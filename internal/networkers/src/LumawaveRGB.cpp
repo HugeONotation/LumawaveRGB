@@ -1,39 +1,24 @@
 #include "LumawaveRGB.hpp"
 
 #include <iostream>
+#include <vector>
+#include <string>
+#include <array>
+#include <span>
 
 #include <boost/asio.hpp>
 
 namespace lwrgb {
 
-    void client_session(boost::asio::ip::tcp::socket socket) {
-        try {
-            while (true) {
-                char data[4 * 1024];
+    struct Client_connection {
+        std::vector<std::array<std::uint8_t, 3>> buffer;
 
-                boost::system::error_code error;
 
-                std::size_t length = socket.read_some(boost::asio::buffer(data), error);
 
-                std::cout << std::string_view{data, length} << std::endl;
+        boost::asio::ip::tcp::socket socket;
+    };
 
-                //TODO: Utilize data read from buffer
-
-                if (error == boost::asio::error::eof) {
-                    break; // Connection closed by server
-                } else if (error) {
-                    throw boost::system::system_error(error);
-                }
-
-                //boost::asio::write(socket, boost::asio::buffer(data, length));
-            }
-        } catch (std::exception& e) {
-            //TODO: Do proper error handling
-            std::cerr << "Exception in thread: " << e.what() << std::endl;
-        }
-    }
-
-    std::string_view verify_server_configure(const Server_config& config) {
+    std::string_view verify_server_config(const Server_config& config) {
         if (config.use_ipv6) {
             if (config.ip6_address[0] == 0 || config.ip6_address[1] == 0) {
                 return "ipv6 address not initialized";
@@ -52,7 +37,7 @@ namespace lwrgb {
     }
 
     std::string_view run_server(const Server_config& config) {
-        std::string_view result = verify_server_configure(config);
+        std::string_view result = verify_server_config(config);
         if (!result.empty()) {
             return result;
         }
@@ -86,7 +71,34 @@ namespace lwrgb {
         return {};
     }
 
-    std::string_view verify_client_configure(const Client_config& config) {
+    void client_session(boost::asio::ip::tcp::socket socket) {
+        try {
+            while (true) {
+                char data[4 * 1024];
+
+                boost::system::error_code error;
+
+                std::size_t length = socket.read_some(boost::asio::buffer(data), error);
+
+                std::cout << std::string_view{data, length} << std::endl;
+
+                //TODO: Utilize data read from buffer
+
+                if (error == boost::asio::error::eof) {
+                    break; // Connection closed by server
+                } else if (error) {
+                    throw boost::system::system_error(error);
+                }
+
+                //boost::asio::write(socket, boost::asio::buffer(data, length));
+            }
+        } catch (std::exception& e) {
+            //TODO: Do proper error handling
+            std::cerr << "Exception in thread: " << e.what() << std::endl;
+        }
+    }
+
+    std::string_view verify_client_config(const Client_config& config) {
         if (config.use_ipv6) {
             if (config.ip6_address[0] == 0 || config.ip6_address[1] == 0) {
                 return "ipv6 address not initialized";
@@ -105,7 +117,7 @@ namespace lwrgb {
     }
 
     std::string_view run_client(const Client_config& config) {
-        std::string_view result = verify_client_configure(config);
+        std::string_view result = verify_client_config(config);
         if (!result.empty()) {
             return result;
         }

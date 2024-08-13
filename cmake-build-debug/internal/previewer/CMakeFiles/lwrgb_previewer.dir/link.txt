@@ -1,0 +1,1 @@
+/usr/bin/g++-12 -g CMakeFiles/lwrgb_previewer.dir/src/LWRGB_previewer.cpp.o ../../external/glad/CMakeFiles/glad.dir/src/glad.c.o -o lwrgb_previewer  -lglfw ../shader_engine/liblumawavergb_shader_engine.a -lfftw3 -lmpg123 -lm 
